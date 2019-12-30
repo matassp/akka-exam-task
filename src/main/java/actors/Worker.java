@@ -34,12 +34,12 @@ public class Worker extends AbstractLoggingActor {
             str.append(digit);
         String uselessNumber = str.toString();
         Collector.Result result = new Collector.Result(work.creditCard, uselessNumber);
-        collector.tell(result, self());
+        collector.tell(result, getSelf());
         System.out.println("Done " + getSelf().path().name());
     }
 
     // actor factory with an argument
     public static Props props(ActorRef collector) {
-        return Props.create(Worker.class, collector);
+        return Props.create(Worker.class, collector).withDispatcher("my-dispatcher");
     }
 }

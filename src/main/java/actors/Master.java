@@ -2,18 +2,12 @@ package actors;
 
 import akka.actor.AbstractLoggingActor;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.routing.ActorRefRoutee;
-import akka.routing.RoundRobinRoutingLogic;
-import akka.routing.Routee;
-import akka.routing.Router;
+import akka.routing.*;
 import main.CreditCard;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static main.ExamTaskApplication.WORKER_ACTORS_COUNT;
+import static main.ExamTaskApplication.WORKER_COUNT;
 
 public class Master extends AbstractLoggingActor {
 
@@ -25,26 +19,26 @@ public class Master extends AbstractLoggingActor {
         }
     }
 
-    Router router;
+    ActorRef collector;
+    ActorRef router;
     {
         // create result collector
-        final ActorRef collector = getContext().actorOf(Collector.props(), "collector");
-
-        // routing
-        List<Routee> routees = new ArrayList<Routee>();
-        for (int i = 0; i < WORKER_ACTORS_COUNT; i++) {
-            ActorRef r = getContext().actorOf(Worker.props(collector), "worker-" + i);
-            getContext().watch(r);
-            routees.add(new ActorRefRoutee(r));
-        }
-        router = new Router(new RoundRobinRoutingLogic(), routees);
+        collector = getContext().actorOf(Collector.props(), "collector");
+        // create router as a pool
+        router = getContext().actorOf(new RoundRobinPool(WORKER_COUNT).props(Worker.props(collector)), "router");
+        //router = getContext().actorOf(new SmallestMailboxPool(WORKER_COUNT).props(Worker.props(collector)), "router");
+        //router = getContext().actorOf(new BalancingPool(WORKER_COUNT).props(Worker.props(collector)), "router");
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Work.class, message -> {
-                    router.route(message, self());})
+                    router.tell(message, getSelf());
+                })
+                .match(String.class, m -> {
+                    router.tell(new Broadcast(PoisonPill.getInstance()), getSelf());
+                })
                 .build();
     }
 

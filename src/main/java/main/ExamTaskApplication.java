@@ -3,6 +3,7 @@ package main;
 import actors.Master;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.typesafe.config.ConfigFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -19,8 +20,8 @@ public class ExamTaskApplication {
     public static final String DATASET_1_PATH = "src/main/resources/dataset-1.json";
     public static final String DATASET_2_PATH = "src/main/resources/dataset-2.json";
     public static final String DATASET_3_PATH = "src/main/resources/dataset-3.json";
-    public static final int WORKER_ACTORS_COUNT = 4;
-    public static final int USELESS_NUMBER_LENGTH = 9;
+    public static final int WORKER_COUNT = 4;
+    public static final int USELESS_NUMBER_LENGTH = 8;
 
     public static void main(String[] args) throws IOException, JSONException {
         ActorSystem system = ActorSystem.create("main");
@@ -29,6 +30,7 @@ public class ExamTaskApplication {
         List<CreditCard> creditCards = getCreditCards(DATASET_1_PATH);
 
         creditCards.forEach(card -> master.tell(new Master.Work(card), ActorRef.noSender()));
+        master.tell("stop", ActorRef.noSender());
     }
 
     private static String readFile(String path, Charset encoding) throws IOException {
