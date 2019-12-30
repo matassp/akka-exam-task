@@ -1,45 +1,37 @@
 package main;
 
-import lombok.Data;
+import lombok.Getter;
 
-import static java.lang.String.valueOf;
-
-@Data
+@Getter
+// this class is used as a part of a message, therefore must be immutable
 public class CreditCard {
 
     public CreditCard(String name, String number, double balance) {
-        Name = name;
-        CCNumber = number;
-        Balance = balance;
+        this.name = name;
+        this.CCnumber = number;
+        this.balance = balance;
+        this.uselessValue = "N/A";
     }
 
-    public CreditCard(String name, String number, double balance, String uselessValue) {
-        Name = name;
-        CCNumber = number;
-        Balance = balance;
-        UselessValue = uselessValue;
+    public CreditCard(CreditCard creditCard, String uselessValue) {
+        this.name = creditCard.name;
+        this.CCnumber = creditCard.CCnumber;
+        this.balance = creditCard.balance;
+        this.uselessValue = uselessValue;
     }
 
-    private String Name;
-    private String CCNumber;
-    private double Balance;
-    private String UselessValue;
+    private final String name;
+    private final String CCnumber;
+    private final double balance;
+    private final String uselessValue;
 
-    public CreditCard uselessWork() throws InterruptedException {
-        Thread.sleep(100);
-        System.out.println(Name + " done");
-        return new CreditCard(this.Name, this.CCNumber, this.Balance, getNumericString());
-    }
-
-    private String getNumericString() {
-        StringBuilder str = new StringBuilder();
-        for(char c : Name.toCharArray()) {
-            str.append(Character.getNumericValue(c));
+    // get array of n ints from cc number
+    public int[] getArrayOf(int n) {
+        String subString = this.CCnumber.substring(0, n);
+        int[] array = new int[n];
+        for (int i = 0; i < n; i++) {
+            array[i] = subString.charAt(i) - '0';
         }
-        str.append(CCNumber);
-        String balance = valueOf(Balance).replace(".", "");
-        str.append(balance);
-        return str.toString();
+        return array;
     }
-
 }
