@@ -1,5 +1,6 @@
 package main;
 
+import actors.Master;
 import akka.actor.AbstractLoggingActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -20,39 +21,21 @@ import java.util.List;
 
 public class ExamTaskApplication {
 
-//    static class Counter extends AbstractLoggingActor {
-//        // protocol
-//        static class Message {}
-//
-//        private int counter = 0;
-//
-//        @Override
-//        public Receive createReceive() {
-//            return receiveBuilder()
-//                    .match(Message.class, this::onMessage)
-//                    .build();
-//        }
-//
-//        private void onMessage(Message message) {
-//            counter++;
-//            log().info("Increase counter " + counter);
-//        }
-//
-//        public static Props props() {
-//            return Props.create(Counter.class);
-//        }
-//    }
+    static final String DATASET_1_PATH = "src/main/resources/dataset-1.json";
+    static final String DATASET_2_PATH = "src/main/resources/dataset-2.json";
+    static final String DATASET_3_PATH = "src/main/resources/dataset-3.json";
 
     public static void main(String[] args) throws IOException, JSONException {
-//        ActorSystem system = ActorSystem.create("sample");
-//
-//        final ActorRef counter = system.actorOf(Counter.props(), "counter");
-//        counter.tell(new Counter.Message(), ActorRef.noSender());
-//
-//        System.out.println("ENTER to terminate");
-//        System.in.read();
-        String path = new File("src/main/resources/dataset-1.json").getAbsolutePath();
+        ActorSystem system = ActorSystem.create("main");
+        final ActorRef master = system.actorOf(Master.props(), "master");
+
+        String path = new File(DATASET_1_PATH).getAbsolutePath();
         List<CreditCard> cards = getCreditCards(path);
+
+        cards.forEach(card -> master.tell(new Master.Work(card), ActorRef.noSender()));
+
+        System.out.println("ENTER to terminate");
+        System.in.read();
     }
 
     private static String readFile(String path, Charset encoding) throws IOException {

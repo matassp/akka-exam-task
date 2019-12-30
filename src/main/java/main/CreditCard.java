@@ -11,7 +11,13 @@ public class CreditCard {
         Name = name;
         CCNumber = number;
         Balance = balance;
-        UselessValue = getNumericString();
+    }
+
+    public CreditCard(String name, String number, double balance, String uselessValue) {
+        Name = name;
+        CCNumber = number;
+        Balance = balance;
+        UselessValue = uselessValue;
     }
 
     private String Name;
@@ -19,10 +25,10 @@ public class CreditCard {
     private double Balance;
     private String UselessValue;
 
-    public void uselessWork() throws InterruptedException {
+    public CreditCard uselessWork() throws InterruptedException {
         Thread.sleep(100);
-        String UselessValue = getNumericString();
         System.out.println(Name + " done");
+        return new CreditCard(this.Name, this.CCNumber, this.Balance, getNumericString());
     }
 
     private String getNumericString() {
