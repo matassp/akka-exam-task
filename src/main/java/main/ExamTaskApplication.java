@@ -16,10 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExamTaskApplication {
-    static final String DATASET_1_PATH = "src/main/resources/dataset-1.json";
-    static final String DATASET_2_PATH = "src/main/resources/dataset-2.json";
-    static final String DATASET_3_PATH = "src/main/resources/dataset-3.json";
-    static final int WORKER_ACTORS = 4;
+    public static final String DATASET_1_PATH = "src/main/resources/dataset-1.json";
+    public static final String DATASET_2_PATH = "src/main/resources/dataset-2.json";
+    public static final String DATASET_3_PATH = "src/main/resources/dataset-3.json";
+    public static final int WORKER_ACTORS_COUNT = 4;
+    public static final int USELESS_NUMBER_LENGTH = 9;
 
     public static void main(String[] args) throws IOException, JSONException {
         ActorSystem system = ActorSystem.create("main");

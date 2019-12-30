@@ -10,22 +10,13 @@ public class CreditCard {
         this.name = name;
         this.CCnumber = number;
         this.balance = balance;
-        this.uselessValue = "N/A";
-    }
-
-    public CreditCard(CreditCard creditCard, String uselessValue) {
-        this.name = creditCard.name;
-        this.CCnumber = creditCard.CCnumber;
-        this.balance = creditCard.balance;
-        this.uselessValue = uselessValue;
     }
 
     private final String name;
     private final String CCnumber;
     private final double balance;
-    private final String uselessValue;
 
-    // get array of n ints from cc number
+    // get array of n ints from CCnumber
     public int[] getArrayOf(int n) {
         String subString = this.CCnumber.substring(0, n);
         int[] array = new int[n];

@@ -13,12 +13,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Master extends AbstractLoggingActor {
-    // protocol
-    public static final class Work implements Serializable {
-        private static final long serialVersionUID = 1L;
-        public final CreditCard creditCard;
+import static main.ExamTaskApplication.WORKER_ACTORS_COUNT;
 
+public class Master extends AbstractLoggingActor {
+
+    // protocol
+    public static final class Work {
+        public final CreditCard creditCard;
         public Work(CreditCard creditCard) {
             this.creditCard = creditCard;
         }
@@ -26,9 +27,13 @@ public class Master extends AbstractLoggingActor {
 
     Router router;
     {
+        // create result collector
+        final ActorRef collector = getContext().actorOf(Collector.props(), "collector");
+
+        // routing
         List<Routee> routees = new ArrayList<Routee>();
-        for (int i = 0; i < 5; i++) {
-            ActorRef r = getContext().actorOf(Props.create(Worker.class));
+        for (int i = 0; i < WORKER_ACTORS_COUNT; i++) {
+            ActorRef r = getContext().actorOf(Worker.props(collector), "worker-" + i);
             getContext().watch(r);
             routees.add(new ActorRefRoutee(r));
         }
@@ -38,10 +43,12 @@ public class Master extends AbstractLoggingActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Work.class, message -> router.route(message, getSender()))
+                .match(Work.class, message -> {
+                    router.route(message, self());})
                 .build();
     }
 
+    // actor factory
     public static Props props() {
         return Props.create(Master.class);
     }
