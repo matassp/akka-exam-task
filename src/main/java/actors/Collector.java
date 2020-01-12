@@ -1,8 +1,6 @@
 package actors;
 
 import akka.actor.AbstractActor;
-import akka.actor.AbstractLoggingActor;
-import akka.actor.ActorRef;
 import akka.actor.Props;
 import main.CreditCard;
 
@@ -23,7 +21,7 @@ public class Collector extends AbstractActor {
 
     private PrintWriter writer;
 
-    // open file stream
+    // create results file and open file stream
     @Override
     public void preStart() throws IOException {
         FileWriter fileWriter = new FileWriter("results.txt");
@@ -37,7 +35,7 @@ public class Collector extends AbstractActor {
         );
     }
 
-    // close file stream
+    // close results file stream
     @Override
     public void postStop() {
         this.writer.close();
@@ -51,6 +49,7 @@ public class Collector extends AbstractActor {
                 .build();
     }
 
+    // write a line to results file
     private void onMessage(Result result) {
         Object[] row = new String[] {
                 result.creditCard.getName(),

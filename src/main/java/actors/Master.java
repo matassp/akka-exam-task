@@ -11,6 +11,21 @@ import java.util.concurrent.ExecutionException;
 
 import static main.ExamTaskApplication.WORKER_COUNT;
 
+/* actor hierarchy:
+
+             +---------+
+            -| master  |-
+           / +---------+ \
+         /                 \
+    +-----------+      +------------+
+    | collector |    --|   router   |---
+    +-----------+   /  +------------+    \
+                   /           |          \
+             +---------+   +---------+  +-----+
+             | worker1 |   | worker2 |  | ... |
+             +---------+   +---------+  +-----+
+ */
+
 public class Master extends AbstractActor {
 
     // protocol

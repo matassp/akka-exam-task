@@ -3,7 +3,6 @@ package main;
 import actors.Master;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import com.typesafe.config.ConfigFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -24,9 +23,11 @@ public class ExamTaskApplication {
     public static final int USELESS_NUMBER_LENGTH = 8;
 
     public static void main(String[] args) throws IOException, JSONException {
+        // create actor system and master actor
         ActorSystem system = ActorSystem.create("main");
         final ActorRef master = system.actorOf(Master.props(), "master");
 
+        // read credit cards and send them to master actor
         List<CreditCard> creditCards = getCreditCards(DATASET_1_PATH);
 
         creditCards.forEach(card -> master.tell(new Master.Work(card), ActorRef.noSender()));

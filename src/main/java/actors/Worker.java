@@ -1,10 +1,8 @@
 package actors;
 
 import akka.actor.AbstractActor;
-import akka.actor.AbstractLoggingActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import main.CreditCard;
 import utils.BogoSort;
 
 import static main.ExamTaskApplication.USELESS_NUMBER_LENGTH;
@@ -23,7 +21,8 @@ public class Worker extends AbstractActor {
 
     private final ActorRef collector;
 
-    // does heavy computations
+    // sorts first N credit card numbers using bogo sort
+    // filters out sorted numbers that start with 0
     private void onMessage(Master.Work work) {
         int[] array = work
                 .creditCard
@@ -43,7 +42,7 @@ public class Worker extends AbstractActor {
 
     @Override
     public void postStop() {
-        System.out.println("Worker stopped");
+        System.out.printf("Worker %s stopped\n", getContext().getSelf().path().name());
     }
 
     // actor factory with an argument
