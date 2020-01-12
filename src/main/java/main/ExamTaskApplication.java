@@ -30,7 +30,8 @@ public class ExamTaskApplication {
         List<CreditCard> creditCards = getCreditCards(DATASET_1_PATH);
 
         creditCards.forEach(card -> master.tell(new Master.Work(card), ActorRef.noSender()));
-        master.tell("stop", ActorRef.noSender());
+        master.tell("kill", ActorRef.noSender());
+        system.terminate();
     }
 
     private static String readFile(String path, Charset encoding) throws IOException {

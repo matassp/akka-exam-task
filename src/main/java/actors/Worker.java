@@ -1,5 +1,6 @@
 package actors;
 
+import akka.actor.AbstractActor;
 import akka.actor.AbstractLoggingActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -8,7 +9,7 @@ import utils.BogoSort;
 
 import static main.ExamTaskApplication.USELESS_NUMBER_LENGTH;
 
-public class Worker extends AbstractLoggingActor {
+public class Worker extends AbstractActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -24,7 +25,6 @@ public class Worker extends AbstractLoggingActor {
 
     // does heavy computations
     private void onMessage(Master.Work work) {
-        System.out.println("Received " + getSelf().path().name());
         int[] array = work
                 .creditCard
                 .getArrayOf(USELESS_NUMBER_LENGTH);
@@ -33,9 +33,17 @@ public class Worker extends AbstractLoggingActor {
         for (int digit : sortedArray)
             str.append(digit);
         String uselessNumber = str.toString();
+
+        // filtering out numbers that start with 0
+        if (uselessNumber.charAt(0) == '0')
+            return;
         Collector.Result result = new Collector.Result(work.creditCard, uselessNumber);
         collector.tell(result, getSelf());
-        System.out.println("Done " + getSelf().path().name());
+    }
+
+    @Override
+    public void postStop() {
+        System.out.println("Worker stopped");
     }
 
     // actor factory with an argument

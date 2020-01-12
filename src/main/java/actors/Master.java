@@ -1,15 +1,17 @@
 package actors;
 
-import akka.actor.AbstractLoggingActor;
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
+import akka.actor.*;
+import akka.pattern.Patterns;
 import akka.routing.*;
 import main.CreditCard;
 
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import static main.ExamTaskApplication.WORKER_COUNT;
 
-public class Master extends AbstractLoggingActor {
+public class Master extends AbstractActor {
 
     // protocol
     public static final class Work {
@@ -26,8 +28,6 @@ public class Master extends AbstractLoggingActor {
         collector = getContext().actorOf(Collector.props(), "collector");
         // create router as a pool
         router = getContext().actorOf(new RoundRobinPool(WORKER_COUNT).props(Worker.props(collector)), "router");
-        //router = getContext().actorOf(new SmallestMailboxPool(WORKER_COUNT).props(Worker.props(collector)), "router");
-        //router = getContext().actorOf(new BalancingPool(WORKER_COUNT).props(Worker.props(collector)), "router");
     }
 
     @Override
@@ -36,10 +36,36 @@ public class Master extends AbstractLoggingActor {
                 .match(Work.class, message -> {
                     router.tell(message, getSelf());
                 })
-                .match(String.class, m -> {
-                    router.tell(new Broadcast(PoisonPill.getInstance()), getSelf());
+                .matchEquals("kill", message -> {
+                    terminate();
                 })
                 .build();
+    }
+
+    private void terminate() throws ExecutionException, InterruptedException {
+        // stopping all workers using PoisonPill broadcast
+        CompletableFuture<Boolean> workersFuture = Patterns.gracefulStop(
+                router,
+                Duration.ofSeconds(60),
+                new Broadcast(PoisonPill.getInstance())
+        ).toCompletableFuture();
+        // waiting for workers to finish
+        workersFuture.get();
+
+        CompletableFuture<Boolean> collectorFuture = Patterns.gracefulStop(
+                collector,
+                Duration.ofSeconds(60)
+        ).toCompletableFuture();
+        // waiting for collector to finish
+        collectorFuture.get();
+
+        // terminating self
+        context().stop(getSelf());
+    }
+
+    @Override
+    public void postStop() {
+        System.out.println("Master stopped");
     }
 
     // actor factory
